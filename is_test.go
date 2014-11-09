@@ -29,7 +29,7 @@ func TestIs(t *testing.T) {
 		F    func(is is.I)
 		Fail string
 	}{
-		// OK
+		// is.OK
 		{
 			N: "OK(false)",
 			F: func(is is.I) {
@@ -90,7 +90,40 @@ func TestIs(t *testing.T) {
 				is.OK(func() {})
 			},
 		},
-		// Equal
+		// is.Panic
+		{
+			N: "PanicWith(\"panic message\", func(){ panic() })",
+			F: func(is is.I) {
+				is.PanicWith("panic message", func() {
+					panic("panic message")
+				})
+			},
+		},
+		{
+			N: "PanicWith(\"panic message\", func(){ /* no panic */ })",
+			F: func(is is.I) {
+				is.PanicWith("panic message", func() {
+				})
+			},
+			Fail: "expected panic: \"panic message\"",
+		},
+		{
+			N: "Panic(func(){ panic() })",
+			F: func(is is.I) {
+				is.Panic(func() {
+					panic("panic message")
+				})
+			},
+		},
+		{
+			N: "Panic(func(){ /* no panic */ })",
+			F: func(is is.I) {
+				is.Panic(func() {
+				})
+			},
+			Fail: "expected panic",
+		},
+		// is.Equal
 		{
 			N: "Equal(1,1)",
 			F: func(is is.I) {

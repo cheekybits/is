@@ -12,6 +12,12 @@ type I interface {
 	// Equal asserts that the two values are
 	// considered equal. Non strict.
 	Equal(a, b interface{})
+	// Panic asserts that the specified function
+	// panics.
+	Panic(fn func())
+	// PanicWith asserts that the specified function
+	// panics with the specific message.
+	PanicWith(m string, fn func())
 }
 
 // T represents the an interface for reporting
@@ -42,6 +48,36 @@ func (i *i) Equal(a, b interface{}) {
 	}
 }
 
+// Panic asserts that the specified function
+// panics.
+func (i *i) Panic(fn func()) {
+	var r interface{}
+	func() {
+		defer func() {
+			r = recover()
+		}()
+		fn()
+	}()
+	if r == nil {
+		i.t.Fatal("expected panic")
+	}
+}
+
+// PanicWith asserts that the specified function
+// panics with the specific message.
+func (i *i) PanicWith(m string, fn func()) {
+	var r interface{}
+	func() {
+		defer func() {
+			r = recover()
+		}()
+		fn()
+	}()
+	if r != m {
+		i.t.Fatalf("expected panic: \"%s\"", m)
+	}
+}
+
 // New creates a new I capable of making
 // assertions.
 func New(t T) I {
@@ -64,7 +100,7 @@ func isNil(object interface{}) bool {
 func (i *i) isOK(o interface{}) {
 	switch co := o.(type) {
 	case func():
-		// does it panic or not?
+		// shouldn't panic
 		var r interface{}
 		func() {
 			defer func() {

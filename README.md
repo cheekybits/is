@@ -6,6 +6,7 @@ A mini testing helper for Go.
   * Simple interface (`is.OK` and `is.Equal`)
   * Plugs into existing Go toolchain (uses `testing.T`)
   * Obvious for newcomers and newbs
+  * Also gives you `is.Panic` and `is.PanicWith` helpers - because testing panics is ugly
 
 ### Usage
 
@@ -44,6 +45,14 @@ func TestSomething(t *testing.T) {
 
   // ensure many things in one go
   is.OK(b, err, obj, "something")
+
+  // ensure something does panic
+  is.Panic(func(){
+    MethodShouldPanic(1)
+  })
+  is.PanicWith("package: arg must be >0", func(){
+    MethodShouldPanicWithSpecificMessage(0)
+  })
 
   // make sure two values are equal
   is.Equal(1, 2)
