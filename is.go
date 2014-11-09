@@ -63,6 +63,18 @@ func isNil(object interface{}) bool {
 
 func (i *i) isOK(o interface{}) {
 	switch co := o.(type) {
+	case func():
+		// does it panic or not?
+		var r interface{}
+		func() {
+			defer func() {
+				r = recover()
+			}()
+			co()
+		}()
+		if r != nil {
+			i.t.Fatalf("unexpected panic: %v", r)
+		}
 	case error:
 		if co != nil {
 			i.t.Fatal("unexpected error: " + co.Error())

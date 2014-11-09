@@ -37,6 +37,11 @@ func TestSomething(t *testing.T) {
   // ensure not zero
   is.OK(len(something))
 
+  // ensure doesn't panic
+  is.OK(func(){
+    MethodShouldNotPanic()
+  })
+
   // ensure many things in one go
   is.OK(b, err, obj, "something")
 

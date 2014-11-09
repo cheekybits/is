@@ -76,6 +76,19 @@ func TestIs(t *testing.T) {
 				is.OK(errors.New("an error"))
 			},
 			Fail: "unexpected error: an error",
+		}, {
+			N: "OK(func) panic",
+			F: func(is is.I) {
+				is.OK(func() {
+					panic("panic message")
+				})
+			},
+			Fail: "unexpected panic: panic message",
+		}, {
+			N: "OK(func) no panic",
+			F: func(is is.I) {
+				is.OK(func() {})
+			},
 		},
 		// Equal
 		{
