@@ -11,7 +11,7 @@ A mini testing helper for Go.
 ### Usage
 
   1. Write test functions as usual
-  1. Add `is := is.New(t)` at top
+  1. Add `is := is.New(t)` at top of your test functions
   1. Call target code
   1. Make assertions using new `is` object
 
