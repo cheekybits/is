@@ -61,3 +61,20 @@ func TestSomething(t *testing.T) {
 
 }
 ```
+
+### Get started
+
+Get it:
+
+```
+go get github.com/metabition/is
+```
+
+Then import it:
+
+```
+import (
+  "testing"
+  "github.com/metabition/is"
+)
+```
