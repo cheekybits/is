@@ -16,6 +16,7 @@
 //     int   - OK means not zero
 //     error - OK means nil
 //     string - OK means not ""
+//     func() - OK means does not panic
 //     everything else - OK means not nil
 //
 // is.Equal
