@@ -5,7 +5,7 @@ A mini testing helper for Go.
 
   * Simple interface (`is.OK` and `is.Equal`)
   * Plugs into existing Go toolchain (uses `testing.T`)
-  * Obvious for newcomers and noobs
+  * Obvious for newcomers and newbs
 
 ### Usage
 
