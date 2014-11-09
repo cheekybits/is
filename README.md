@@ -9,10 +9,10 @@ A mini testing helper for Go.
 
 ### Usage
 
-  1 Write test functions as usual
-  1 Add `is := is.New(t)` at top
-  1 Call target code
-  1 Make assertions using new `is` object
+  # Write test functions as usual
+  # Add `is := is.New(t)` at top
+  # Call target code
+  # Make assertions using new `is` object
 
 ```
 func TestSomething(t *testing.T) {
