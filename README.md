@@ -7,57 +7,51 @@ A mini testing helper for Go.
   * Plugs into existing Go toolchain (uses `testing.T`)
   * Obvious for newcomers and noobs
 
-### OK
+### Usage
 
-Make sure an object is not `nil`:
+  1 Write test functions as usual
+  1 Add `is := is.New(t)` at top
+  1 Call target code
+  1 Make assertions using new `is` object
 
 ```
 func TestSomething(t *testing.T) {
   is := is.New(t)
+
+  //
+  // OK
+  //
+
+  // ensure not nil
   obj := SomeFunc()
   is.OK(obj)
-}
-```
 
-Make sure no errors occurred:
-
-```
-func TestSomething(t *testing.T) {
-  is := is.New(t)
+  // ensure no error
   obj, err := SomeFunc()
   is.OK(err)
-}
-```
 
-Make sure a `bool` is not `false`:
-
-```
-func TestSomething(t *testing.T) {
-  is := is.New(t)
-  b := SomeFunc()
-  is.OK(b)
-}
-```
-
-Check many things in one go:
-
-```
-func TestSomething(t *testing.T) {
-  is := is.New(t)
+  // ensure not false
   b := SomeBool()
-  obj, err := SomeFunc()
-  is.OK(b, obj, err) // just list things
-}
-```
+  is.OK(b)
 
-### Equal
+  // ensure not ""
+  s := SomeString()
+  is.OK(s)
 
-Are two values equal?
+  // ensure not zero
+  is.OK(len(something))
 
-```
-func TestSomething(t *testing.T) {
-  is := is.New(t)
-  obj := SomeFunc()
-  is.Equal(obj, "Expected value")
+  // ensure many things in one go
+  is.OK(b, err, obj, "something")
+
+  //
+  // Equal
+  //
+
+  // make sure two values are equal
+  is.Equal(1, 2)
+  is.Equal(err, ErrSomething)
+  is.Equal(a, b)
+
 }
 ```
