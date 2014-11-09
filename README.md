@@ -18,9 +18,6 @@ A mini testing helper for Go.
 func TestSomething(t *testing.T) {
   is := is.New(t)
 
-  // OK
-  // --
-
   // ensure not nil
   obj := SomeFunc()
   is.OK(obj)
@@ -42,9 +39,6 @@ func TestSomething(t *testing.T) {
 
   // ensure many things in one go
   is.OK(b, err, obj, "something")
-
-  // Equal
-  // -----
 
   // make sure two values are equal
   is.Equal(1, 2)
