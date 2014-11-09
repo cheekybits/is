@@ -7,7 +7,7 @@
 //       is.Equal(obj, "Hello world")
 //     }
 //
-// is.OK
+// OK
 //
 // is.OK asserts that the specified object is OK, which means
 // different things for different types:
@@ -19,11 +19,11 @@
 //     func() - OK means does not panic
 //     everything else - OK means not nil
 //
-// is.Equal
+// Equality
 //
 // is.Equal asserts that two objects are effectively equal.
 //
-// is.Panic and is.PanicWith
+// Panics
 //
 // is.Panic and is.PanicWith asserts that the func() will panic.
 // PanicWith specifies the panic text that is expected:
