@@ -7,8 +7,8 @@ import (
 
 // I represents the is interface.
 type I interface {
-	// OK asserts that the specified object is OK.
-	OK(o interface{})
+	// OK asserts that the specified objects are all OK.
+	OK(o ...interface{})
 	// Equal asserts that the two values are
 	// considered equal. Non strict.
 	Equal(a, b interface{})
@@ -27,30 +27,10 @@ type i struct {
 	t T
 }
 
-// OK asserts that the specified object is OK.
-func (i *i) OK(o interface{}) {
-	switch co := o.(type) {
-	case error:
-		if co != nil {
-			i.t.Fatal("unexpected error: " + co.Error())
-		}
-	case string:
-		if len(co) == 0 {
-			i.t.Fatal("unexpected \"\"")
-		}
-	case bool:
-		// false
-		if co == false {
-			i.t.Fatal("unexpected false")
-			return
-		}
-	}
-	if isNil(o) {
-		i.t.Fatal("unexpected nil")
-		return
-	}
-	if o == 0 {
-		i.t.Fatal("unexpected zero")
+// OK asserts that the specified objects are all OK.
+func (i *i) OK(o ...interface{}) {
+	for _, obj := range o {
+		i.isOK(obj)
 	}
 }
 
@@ -79,6 +59,32 @@ func isNil(object interface{}) bool {
 		return true
 	}
 	return false
+}
+
+func (i *i) isOK(o interface{}) {
+	switch co := o.(type) {
+	case error:
+		if co != nil {
+			i.t.Fatal("unexpected error: " + co.Error())
+		}
+	case string:
+		if len(co) == 0 {
+			i.t.Fatal("unexpected \"\"")
+		}
+	case bool:
+		// false
+		if co == false {
+			i.t.Fatal("unexpected false")
+			return
+		}
+	}
+	if isNil(o) {
+		i.t.Fatal("unexpected nil")
+		return
+	}
+	if o == 0 {
+		i.t.Fatal("unexpected zero")
+	}
 }
 
 // areEqual gets whether a equals b or not.

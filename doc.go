@@ -3,8 +3,7 @@
 //     func TestSomething(t *testing.T) {
 //       is := is.New(t)
 //       obj, err := MethodBeingTested()
-//       is.OK(obj)
-//       is.OK(err)
+//       is.OK(obj, err) // list of objects, all must be OK
 //       is.Equal(obj, "Hello world")
 //     }
 //

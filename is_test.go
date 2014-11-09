@@ -49,6 +49,11 @@ func TestIs(t *testing.T) {
 			},
 			Fail: "unexpected nil",
 		}, {
+			N: "OK(1,2,3)",
+			F: func(is is.I) {
+				is.OK(1, 2, 3)
+			},
+		}, {
 			N: "OK(0)",
 			F: func(is is.I) {
 				is.OK(0)
