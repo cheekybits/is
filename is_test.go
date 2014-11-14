@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+type customErr struct{}
+
+func (_ *customErr) Error() string {
+	return "Oops"
+}
+
 type mockT struct {
 	failed bool
 }
@@ -69,6 +75,24 @@ func TestIs(t *testing.T) {
 				is.OK(errors.New("an error"))
 			},
 			Fail: "unexpected error: an error",
+		}, {
+			N: "OK(&customErr{})",
+			F: func(is I) {
+				is.OK(&customErr{})
+			},
+			Fail: "unexpected error: Oops",
+		}, {
+			N: "OK(error(nil))",
+			F: func(is I) {
+				var err error
+				is.OK("Yep", err)
+			},
+		}, {
+			N: "OK(customErr(nil))",
+			F: func(is I) {
+				var err *customErr
+				is.OK("Yep", err)
+			},
 		}, {
 			N: "OK(func) panic",
 			F: func(is I) {
