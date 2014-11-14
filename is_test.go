@@ -35,7 +35,6 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.OK(true)
 			},
-			Fail: "",
 		}, {
 			N: "OK(nil)",
 			F: func(is I) {

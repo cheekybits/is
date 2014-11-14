@@ -40,12 +40,14 @@ func (i *i) Log(args ...interface{}) {
 	i.last = fmt.Sprint(args...)
 	fmt.Print(decorate(i.last))
 	i.l.Unlock()
+	i.t.FailNow()
 }
 func (i *i) Logf(format string, args ...interface{}) {
 	i.l.Lock()
 	i.last = fmt.Sprint(fmt.Sprintf(format, args...))
 	fmt.Print(decorate(i.last))
 	i.l.Unlock()
+	i.t.FailNow()
 }
 
 // OK asserts that the specified objects are all OK.
@@ -60,7 +62,6 @@ func (i *i) OK(o ...interface{}) {
 func (i *i) Equal(a, b interface{}) {
 	if !areEqual(a, b) {
 		i.Logf("%v != %v", a, b)
-		i.t.FailNow()
 	}
 }
 
@@ -76,7 +77,6 @@ func (i *i) Panic(fn func()) {
 	}()
 	if r == nil {
 		i.Log("expected panic")
-		i.t.FailNow()
 	}
 }
 
@@ -92,7 +92,6 @@ func (i *i) PanicWith(m string, fn func()) {
 	}()
 	if r != m {
 		i.Logf("expected panic: \"%s\"", m)
-		i.t.FailNow()
 	}
 }
 
@@ -128,34 +127,28 @@ func (i *i) isOK(o interface{}) {
 		}()
 		if r != nil {
 			i.Logf("unexpected panic: %v", r)
-			i.t.FailNow()
 		}
 	case error:
 		if co != nil {
 			i.Log("unexpected error: " + co.Error())
-			i.t.FailNow()
 		}
 	case string:
 		if len(co) == 0 {
 			i.Log("unexpected \"\"")
-			i.t.FailNow()
 		}
 	case bool:
 		// false
 		if co == false {
 			i.Log("unexpected false")
-			i.t.FailNow()
 			return
 		}
 	}
 	if isNil(o) {
 		i.Log("unexpected nil")
-		i.t.FailNow()
 		return
 	}
 	if o == 0 {
 		i.Log("unexpected zero")
-		i.t.FailNow()
 	}
 }
 
