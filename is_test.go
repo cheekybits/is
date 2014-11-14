@@ -7,7 +7,7 @@ import (
 
 type customErr struct{}
 
-func (_ *customErr) Error() string {
+func (e *customErr) Error() string {
 	return "Oops"
 }
 
@@ -72,26 +72,26 @@ func TestIs(t *testing.T) {
 		}, {
 			N: "OK(errors.New(\"an error\"))",
 			F: func(is I) {
-				is.OK(errors.New("an error"))
+				is.NoErr(errors.New("an error"))
 			},
 			Fail: "unexpected error: an error",
 		}, {
 			N: "OK(&customErr{})",
 			F: func(is I) {
-				is.OK(&customErr{})
+				is.NoErr(&customErr{})
 			},
 			Fail: "unexpected error: Oops",
 		}, {
 			N: "OK(error(nil))",
 			F: func(is I) {
 				var err error
-				is.OK("Yep", err)
+				is.NoErr(err)
 			},
 		}, {
 			N: "OK(customErr(nil))",
 			F: func(is I) {
 				var err *customErr
-				is.OK("Yep", err)
+				is.NoErr(err)
 			},
 		}, {
 			N: "OK(func) panic",
@@ -196,6 +196,10 @@ func TestIs(t *testing.T) {
 			}
 			if test.Fail != is.(*i).last {
 				t.Errorf("expected fail \"%s\" but was \"%s\".", test.Fail, is.(*i).last)
+			}
+		} else {
+			if tt.Failed() {
+				t.Errorf("%s shouldn't fail but: %s", test.N, is.(*i).last)
 			}
 		}
 

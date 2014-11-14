@@ -13,6 +13,9 @@ type I interface {
 	// Equal asserts that the two values are
 	// considered equal. Non strict.
 	Equal(a, b interface{})
+	// NoErr asserts that the value is not an
+	// error.
+	NoErr(err error)
 	// Panic asserts that the specified function
 	// panics.
 	Panic(fn func())
@@ -54,6 +57,12 @@ func (i *i) Logf(format string, args ...interface{}) {
 func (i *i) OK(o ...interface{}) {
 	for _, obj := range o {
 		i.isOK(obj)
+	}
+}
+
+func (i *i) NoErr(err error) {
+	if !isNil(err) {
+		i.Log("unexpected error: " + err.Error())
 	}
 }
 
@@ -128,14 +137,12 @@ func (i *i) isOK(o interface{}) {
 		if r != nil {
 			i.Logf("unexpected panic: %v", r)
 		}
-	case error:
-		if co != nil {
-			i.Log("unexpected error: " + co.Error())
-		}
+		return
 	case string:
 		if len(co) == 0 {
 			i.Log("unexpected \"\"")
 		}
+		return
 	case bool:
 		// false
 		if co == false {
@@ -144,12 +151,18 @@ func (i *i) isOK(o interface{}) {
 		}
 	}
 	if isNil(o) {
+		if _, ok := o.(error); ok {
+			// nil errors are ok
+			return
+		}
 		i.Log("unexpected nil")
 		return
 	}
+
 	if o == 0 {
 		i.Log("unexpected zero")
 	}
+
 }
 
 // areEqual gets whether a equals b or not.
