@@ -7,11 +7,35 @@ import (
 	"strings"
 )
 
+// callerinfo returns a string containing the file and line number of the test call
+// that failed.
+func callerinfo() (string, int, bool) {
+
+	file := ""
+	line := 0
+	ok := false
+
+	for i := 0; ; i++ {
+		_, file, line, ok = runtime.Caller(i)
+		if !ok {
+			return "", 0, false
+		}
+		parts := strings.Split(file, "/")
+		dir := parts[len(parts)-2]
+		file = parts[len(parts)-1]
+		if dir != "is" || file == "is_test.go" {
+			break
+		}
+	}
+
+	return file, line, ok
+}
+
 // decorate prefixes the string with the file and line of the call site
 // and inserts the final newline if needed and indentation tabs for formatting.
 // this function was copied from the testing framework.
 func decorate(s string) string {
-	_, file, line, ok := runtime.Caller(4) // decorate + log + public function.
+	file, line, ok := callerinfo() // decorate + log + public function.
 	if ok {
 		// Truncate file name at last file name separator.
 		if index := strings.LastIndex(file, "/"); index >= 0 {
