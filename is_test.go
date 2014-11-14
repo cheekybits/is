@@ -29,6 +29,20 @@ func TestIs(t *testing.T) {
 		F    func(is I)
 		Fail string
 	}{
+		// is.Nil
+		{
+			N: "Nil(nil)",
+			F: func(is I) {
+				is.Nil(nil)
+			},
+		},
+		{
+			N: "Nil(\"nope\")",
+			F: func(is I) {
+				is.Nil("nope")
+			},
+			Fail: "expected nil: \"nope\"",
+		},
 		// is.OK
 		{
 			N: "OK(false)",

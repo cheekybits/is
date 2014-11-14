@@ -16,6 +16,9 @@ type I interface {
 	// NoErr asserts that the value is not an
 	// error.
 	NoErr(err error)
+	// Nil asserts that the specified objects are
+	// all nil.
+	Nil(obj ...interface{})
 	// Panic asserts that the specified function
 	// panics.
 	Panic(fn func())
@@ -63,6 +66,14 @@ func (i *i) OK(o ...interface{}) {
 func (i *i) NoErr(err error) {
 	if !isNil(err) {
 		i.Log("unexpected error: " + err.Error())
+	}
+}
+
+func (i *i) Nil(o ...interface{}) {
+	for _, obj := range o {
+		if !isNil(obj) {
+			i.Logf("expected nil: %#v", obj)
+		}
 	}
 }
 
