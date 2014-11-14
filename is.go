@@ -3,6 +3,7 @@ package is
 import (
 	"fmt"
 	"reflect"
+	"sync"
 )
 
 // I represents the is interface.
@@ -24,13 +25,27 @@ type I interface {
 // failures.
 // testing.T satisfied this interface.
 type T interface {
-	Fatal(...interface{})
-	Fatalf(string, ...interface{})
+	FailNow()
 }
 
 // i represents an implementation of interface I.
 type i struct {
-	t T
+	t    T
+	last string
+	l    sync.Mutex
+}
+
+func (i *i) Log(args ...interface{}) {
+	i.l.Lock()
+	i.last = fmt.Sprint(args...)
+	fmt.Print(decorate(i.last))
+	i.l.Unlock()
+}
+func (i *i) Logf(format string, args ...interface{}) {
+	i.l.Lock()
+	i.last = fmt.Sprint(fmt.Sprintf(format, args...))
+	fmt.Print(decorate(i.last))
+	i.l.Unlock()
 }
 
 // OK asserts that the specified objects are all OK.
@@ -44,7 +59,8 @@ func (i *i) OK(o ...interface{}) {
 // considered equal. Non strict.
 func (i *i) Equal(a, b interface{}) {
 	if !areEqual(a, b) {
-		i.t.Fatalf("%v != %v", a, b)
+		i.Logf("%v != %v", a, b)
+		i.t.FailNow()
 	}
 }
 
@@ -59,7 +75,8 @@ func (i *i) Panic(fn func()) {
 		fn()
 	}()
 	if r == nil {
-		i.t.Fatal("expected panic")
+		i.Log("expected panic")
+		i.t.FailNow()
 	}
 }
 
@@ -74,7 +91,8 @@ func (i *i) PanicWith(m string, fn func()) {
 		fn()
 	}()
 	if r != m {
-		i.t.Fatalf("expected panic: \"%s\"", m)
+		i.Logf("expected panic: \"%s\"", m)
+		i.t.FailNow()
 	}
 }
 
@@ -109,29 +127,35 @@ func (i *i) isOK(o interface{}) {
 			co()
 		}()
 		if r != nil {
-			i.t.Fatalf("unexpected panic: %v", r)
+			i.Logf("unexpected panic: %v", r)
+			i.t.FailNow()
 		}
 	case error:
 		if co != nil {
-			i.t.Fatal("unexpected error: " + co.Error())
+			i.Log("unexpected error: " + co.Error())
+			i.t.FailNow()
 		}
 	case string:
 		if len(co) == 0 {
-			i.t.Fatal("unexpected \"\"")
+			i.Log("unexpected \"\"")
+			i.t.FailNow()
 		}
 	case bool:
 		// false
 		if co == false {
-			i.t.Fatal("unexpected false")
+			i.Log("unexpected false")
+			i.t.FailNow()
 			return
 		}
 	}
 	if isNil(o) {
-		i.t.Fatal("unexpected nil")
+		i.Log("unexpected nil")
+		i.t.FailNow()
 		return
 	}
 	if o == 0 {
-		i.t.Fatal("unexpected zero")
+		i.Log("unexpected zero")
+		i.t.FailNow()
 	}
 }
 
