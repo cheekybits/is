@@ -36,9 +36,10 @@ type T interface {
 
 // i represents an implementation of interface I.
 type i struct {
-	t    T
-	last string
-	l    sync.Mutex
+	t       T
+	last    string
+	l       sync.Mutex
+	relaxed bool
 }
 
 func (i *i) Log(args ...interface{}) {
@@ -46,14 +47,18 @@ func (i *i) Log(args ...interface{}) {
 	i.last = fmt.Sprint(args...)
 	fmt.Print(decorate(i.last))
 	i.l.Unlock()
-	i.t.FailNow()
+	if !i.relaxed {
+		i.t.FailNow()
+	}
 }
 func (i *i) Logf(format string, args ...interface{}) {
 	i.l.Lock()
 	i.last = fmt.Sprint(fmt.Sprintf(format, args...))
 	fmt.Print(decorate(i.last))
 	i.l.Unlock()
-	i.t.FailNow()
+	if !i.relaxed {
+		i.t.FailNow()
+	}
 }
 
 // OK asserts that the specified objects are all OK.
@@ -119,6 +124,13 @@ func (i *i) PanicWith(m string, fn func()) {
 // assertions.
 func New(t T) I {
 	return &i{t: t}
+}
+
+// Relaxed creates a new I capable of making
+// assertions, but will not fail immediately
+// allowing all assertions to run.
+func Relaxed(t T) I {
+	return &i{t: t, relaxed: true}
 }
 
 // isNil gets whether the object is nil or not.

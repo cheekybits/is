@@ -37,4 +37,20 @@
 //         OtherMethod(nil, nil)
 //       })
 //     }
+//
+// Relaxed
+//
+// To prevent is from stopping when the first assertion fails,
+// you can use is.Relaxed(t), rather than is.New(t).
+//
+//     func TestManyThings(t *testing.T) {
+//       is := is.Relaxed(t)
+//       thing, err := Something();
+//       is.OK(thing)
+//       is.Nil(err)
+//       another, err := Another();
+//       is.Nil(another)
+//       is.Err(err)
+//       // all assertions will be tried
+//     }
 package is

@@ -220,3 +220,17 @@ func TestIs(t *testing.T) {
 	}
 
 }
+
+func TestNewStrict(t *testing.T) {
+	tt := new(mockT)
+	is := Relaxed(tt)
+
+	is.OK(nil)
+	is.Equal(1, 2)
+	is.NoErr(errors.New("nope"))
+
+	if tt.Failed() {
+		t.Error("Relaxed should not call FailNow")
+	}
+
+}
