@@ -1,6 +1,8 @@
 is
 ==
 
+[![GoDoc](https://godoc.org/github.com/metabition/is?status.png)](http://godoc.org/github.com/metabition/is)
+
 A mini testing helper for Go.
 
   * Simple interface (`is.OK` and `is.Equal`)
