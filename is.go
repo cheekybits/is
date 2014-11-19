@@ -15,7 +15,7 @@ type I interface {
 	Equal(a, b interface{})
 	// NoErr asserts that the value is not an
 	// error.
-	NoErr(err error)
+	NoErr(err ...error)
 	// Nil asserts that the specified objects are
 	// all nil.
 	Nil(obj ...interface{})
@@ -37,15 +37,16 @@ type T interface {
 // i represents an implementation of interface I.
 type i struct {
 	t       T
-	last    string
+	fails   []string
 	l       sync.Mutex
 	relaxed bool
 }
 
 func (i *i) Log(args ...interface{}) {
 	i.l.Lock()
-	i.last = fmt.Sprint(args...)
-	fmt.Print(decorate(i.last))
+	fail := fmt.Sprint(args...)
+	i.fails = append(i.fails, fail)
+	fmt.Print(decorate(fail))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -53,8 +54,9 @@ func (i *i) Log(args ...interface{}) {
 }
 func (i *i) Logf(format string, args ...interface{}) {
 	i.l.Lock()
-	i.last = fmt.Sprint(fmt.Sprintf(format, args...))
-	fmt.Print(decorate(i.last))
+	fail := fmt.Sprintf(format, args...)
+	i.fails = append(i.fails, fail)
+	fmt.Print(decorate(fail))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -64,20 +66,74 @@ func (i *i) Logf(format string, args ...interface{}) {
 // OK asserts that the specified objects are all OK.
 func (i *i) OK(o ...interface{}) {
 	for _, obj := range o {
-		i.isOK(obj)
+
+		if isNil(obj) {
+			i.Log("unexpected nil")
+		}
+
+		switch co := obj.(type) {
+		case func():
+			// shouldn't panic
+			var r interface{}
+			func() {
+				defer func() {
+					r = recover()
+				}()
+				co()
+			}()
+			if r != nil {
+				i.Logf("unexpected panic: %v", r)
+			}
+			return
+		case string:
+			if len(co) == 0 {
+				i.Log("unexpected \"\"")
+			}
+			return
+		case bool:
+			// false
+			if co == false {
+				i.Log("unexpected false")
+				return
+			}
+		}
+		if isNil(o) {
+			if _, ok := obj.(error); ok {
+				// nil errors are ok
+				return
+			}
+			i.Log("unexpected nil")
+			return
+		}
+
+		if obj == 0 {
+			i.Log("unexpected zero")
+		}
 	}
 }
 
-func (i *i) NoErr(err error) {
-	if !isNil(err) {
-		i.Log("unexpected error: " + err.Error())
+func (i *i) NoErr(errs ...error) {
+	for n, err := range errs {
+		if !isNil(err) {
+			p := "unexpected error"
+			if len(errs) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			p += ": " + err.Error()
+			i.Logf(p)
+		}
 	}
 }
 
 func (i *i) Nil(o ...interface{}) {
-	for _, obj := range o {
+	for n, obj := range o {
 		if !isNil(obj) {
-			i.Logf("expected nil: %#v", obj)
+			p := "expected nil"
+			if len(o) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			p += ": " + fmt.Sprintf("%#v", obj)
+			i.Logf(p)
 		}
 	}
 }
@@ -144,48 +200,6 @@ func isNil(object interface{}) bool {
 		return true
 	}
 	return false
-}
-
-func (i *i) isOK(o interface{}) {
-	switch co := o.(type) {
-	case func():
-		// shouldn't panic
-		var r interface{}
-		func() {
-			defer func() {
-				r = recover()
-			}()
-			co()
-		}()
-		if r != nil {
-			i.Logf("unexpected panic: %v", r)
-		}
-		return
-	case string:
-		if len(co) == 0 {
-			i.Log("unexpected \"\"")
-		}
-		return
-	case bool:
-		// false
-		if co == false {
-			i.Log("unexpected false")
-			return
-		}
-	}
-	if isNil(o) {
-		if _, ok := o.(error); ok {
-			// nil errors are ok
-			return
-		}
-		i.Log("unexpected nil")
-		return
-	}
-
-	if o == 0 {
-		i.Log("unexpected zero")
-	}
-
 }
 
 // areEqual gets whether a equals b or not.

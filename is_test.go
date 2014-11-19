@@ -2,6 +2,7 @@ package is
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -25,9 +26,9 @@ func (m *mockT) Failed() bool {
 func TestIs(t *testing.T) {
 
 	for _, test := range []struct {
-		N    string
-		F    func(is I)
-		Fail string
+		N     string
+		F     func(is I)
+		Fails []string
 	}{
 		// is.Nil
 		{
@@ -41,7 +42,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.Nil("nope")
 			},
-			Fail: "expected nil: \"nope\"",
+			Fails: []string{"expected nil: \"nope\""},
 		},
 		// is.OK
 		{
@@ -49,7 +50,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.OK(false)
 			},
-			Fail: "unexpected false",
+			Fails: []string{"unexpected false"},
 		}, {
 			N: "OK(true)",
 			F: func(is I) {
@@ -60,7 +61,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.OK(nil)
 			},
-			Fail: "unexpected nil",
+			Fails: []string{"unexpected nil"},
 		}, {
 			N: "OK(1,2,3)",
 			F: func(is I) {
@@ -71,7 +72,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.OK(0)
 			},
-			Fail: "unexpected zero",
+			Fails: []string{"unexpected zero"},
 		}, {
 			N: "OK(1)",
 			F: func(is I) {
@@ -82,26 +83,46 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.OK("")
 			},
-			Fail: "unexpected \"\"",
-		}, {
-			N: "OK(errors.New(\"an error\"))",
+			Fails: []string{"unexpected \"\""},
+		},
+		// NoErr
+		{
+			N: "NoErr(errors.New(\"an error\"))",
 			F: func(is I) {
 				is.NoErr(errors.New("an error"))
 			},
-			Fail: "unexpected error: an error",
+			Fails: []string{"unexpected error: an error"},
 		}, {
-			N: "OK(&customErr{})",
+			N: "NoErr(&customErr{})",
 			F: func(is I) {
 				is.NoErr(&customErr{})
 			},
-			Fail: "unexpected error: Oops",
+			Fails: []string{"unexpected error: Oops"},
 		}, {
-			N: "OK(error(nil))",
+			N: "NoErr(error(nil))",
 			F: func(is I) {
 				var err error
 				is.NoErr(err)
 			},
-		}, {
+		},
+		{
+			N: "NoErr(err1, err2, err3)",
+			F: func(is I) {
+				is.NoErr(&customErr{}, &customErr{}, &customErr{})
+			},
+			Fails: []string{"unexpected error: Oops"},
+		},
+		{
+			N: "NoErr(err1, err2, err3)",
+			F: func(is I) {
+				var err1 error
+				var err2 error
+				var err3 error
+				is.NoErr(err1, err2, err3)
+			},
+		},
+		// OK
+		{
 			N: "OK(customErr(nil))",
 			F: func(is I) {
 				var err *customErr
@@ -114,7 +135,7 @@ func TestIs(t *testing.T) {
 					panic("panic message")
 				})
 			},
-			Fail: "unexpected panic: panic message",
+			Fails: []string{"unexpected panic: panic message"},
 		}, {
 			N: "OK(func) no panic",
 			F: func(is I) {
@@ -136,7 +157,7 @@ func TestIs(t *testing.T) {
 				is.PanicWith("panic message", func() {
 				})
 			},
-			Fail: "expected panic: \"panic message\"",
+			Fails: []string{"expected panic: \"panic message\""},
 		},
 		{
 			N: "Panic(func(){ panic() })",
@@ -152,7 +173,7 @@ func TestIs(t *testing.T) {
 				is.Panic(func() {
 				})
 			},
-			Fail: "expected panic",
+			Fails: []string{"expected panic"},
 		},
 		// is.Equal
 		{
@@ -165,19 +186,19 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.Equal(1, 2)
 			},
-			Fail: "1 != 2",
+			Fails: []string{"1 != 2"},
 		}, {
 			N: "Equal(1,nil)",
 			F: func(is I) {
 				is.Equal(1, nil)
 			},
-			Fail: "1 != <nil>",
+			Fails: []string{"1 != <nil>"},
 		}, {
 			N: "Equal(nil,1)",
 			F: func(is I) {
 				is.Equal(nil, 1)
 			},
-			Fail: "<nil> != 1",
+			Fails: []string{"<nil> != 1"},
 		}, {
 			N: "Equal(false,false)",
 			F: func(is I) {
@@ -204,16 +225,18 @@ func TestIs(t *testing.T) {
 			test.F(is)
 		}()
 
-		if len(test.Fail) > 0 {
-			if !tt.Failed() {
-				t.Errorf("%s should fail", test.N)
-			}
-			if test.Fail != is.(*i).last {
-				t.Errorf("expected fail \"%s\" but was \"%s\".", test.Fail, is.(*i).last)
+		if len(test.Fails) > 0 {
+			for n, fail := range test.Fails {
+				if !tt.Failed() {
+					t.Errorf("%s should fail", test.N)
+				}
+				if test.Fails[n] != fail {
+					t.Errorf("expected fail \"%s\" but was \"%s\".", test.Fails[n], fail)
+				}
 			}
 		} else {
 			if tt.Failed() {
-				t.Errorf("%s shouldn't fail but: %s", test.N, is.(*i).last)
+				t.Errorf("%s shouldn't fail but: %s", test.N, strings.Join(test.Fails, ", "))
 			}
 		}
 
