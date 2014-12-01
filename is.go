@@ -208,7 +208,7 @@ func areEqual(a, b interface{}) bool {
 		if isNil(a) && isNil(b) {
 			return true
 		}
-		return a == b
+		return false
 	}
 	if reflect.DeepEqual(a, b) {
 		return true
