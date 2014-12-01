@@ -177,6 +177,14 @@ func TestIs(t *testing.T) {
 		},
 		// is.Equal
 		{
+			N: "Equal(msi,msi) nil maps",
+			F: func(is I) {
+				var m1 map[string]interface{}
+				var m2 map[string]interface{}
+				is.Equal(m1, m2)
+			},
+		},
+		{
 			N: "Equal(1,1)",
 			F: func(is I) {
 				is.Equal(1, 1)
