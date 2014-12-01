@@ -1,7 +1,7 @@
 is
 ==
 
-[![GoDoc](https://godoc.org/github.com/metabition/is?status.png)](http://godoc.org/github.com/metabition/is)
+[![GoDoc](https://godoc.org/github.com/cheekybits/is?status.png)](http://godoc.org/github.com/cheekybits/is)
 
 A mini testing helper for Go.
 
@@ -69,7 +69,7 @@ func TestSomething(t *testing.T) {
 Get it:
 
 ```
-go get github.com/metabition/is
+go get github.com/cheekybits/is
 ```
 
 Then import it:
@@ -77,6 +77,6 @@ Then import it:
 ```
 import (
   "testing"
-  "github.com/metabition/is"
+  "github.com/cheekybits/is"
 )
 ```
