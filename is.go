@@ -205,6 +205,12 @@ func isNil(object interface{}) bool {
 // areEqual gets whether a equals b or not.
 func areEqual(a, b interface{}) bool {
 	if isNil(a) || isNil(b) {
+		if isNil(a) && !isNil(b) {
+			return false
+		}
+		if !isNil(a) && isNil(b) {
+			return false
+		}
 		return a == b
 	}
 	if reflect.DeepEqual(a, b) {
