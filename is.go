@@ -25,6 +25,12 @@ type I interface {
 	// PanicWith asserts that the specified function
 	// panics with the specific message.
 	PanicWith(m string, fn func())
+	// Fail indicates that the test has failed with the
+	// specified formatted arguments.
+	Fail(args ...interface{})
+	// Failf indicates that the test has failed with the
+	// formatted arguments.
+	Failf(format string, args ...interface{})
 }
 
 // T represents the an interface for reporting
@@ -144,6 +150,14 @@ func (i *i) Equal(a, b interface{}) {
 	if !areEqual(a, b) {
 		i.Logf("%v != %v", a, b)
 	}
+}
+
+func (i *i) Fail(args ...interface{}) {
+	i.Log(args...)
+}
+
+func (i *i) Failf(format string, args ...interface{}) {
+	i.Logf(format, args...)
 }
 
 // Panic asserts that the specified function

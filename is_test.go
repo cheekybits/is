@@ -30,6 +30,20 @@ func TestIs(t *testing.T) {
 		F     func(is I)
 		Fails []string
 	}{
+		{
+			N: "Fail('msg')",
+			F: func(is I) {
+				is.Fail("something")
+			},
+			Fails: []string{"failed: something"},
+		},
+		{
+			N: "Failf('%d is wrong',123)",
+			F: func(is I) {
+				is.Failf("%d is wrong", 123)
+			},
+			Fails: []string{"failed: 123 is wrong"},
+		},
 		// is.Nil
 		{
 			N: "Nil(nil)",
