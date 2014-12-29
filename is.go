@@ -13,6 +13,9 @@ type I interface {
 	// Equal asserts that the two values are
 	// considered equal. Non strict.
 	Equal(a, b interface{})
+	// NotEqual asserts that the two values are not
+	// considered equal. Non strict.
+	NotEqual(a, b interface{})
 	// NoErr asserts that the value is not an
 	// error.
 	NoErr(err ...error)
@@ -152,6 +155,14 @@ func (i *i) Equal(a, b interface{}) {
 	}
 }
 
+// NotEqual asserts that the two values are not
+// considered equal. Non strict.
+func (i *i) NotEqual(a, b interface{}) {
+	if areEqual(a, b) {
+		i.Logf("%v == %v", a, b)
+	}
+}
+
 func (i *i) Fail(args ...interface{}) {
 	i.Log(args...)
 }
@@ -239,9 +250,6 @@ func areEqual(a, b interface{}) bool {
 	if bValue.Type().ConvertibleTo(aValue.Type()) && aValue == bValue.Convert(aValue.Type()) {
 		return true
 	}
-	// Last ditch effort
-	if fmt.Sprintf("%#v", a) == fmt.Sprintf("%#v", b) {
-		return true
-	}
+
 	return false
 }

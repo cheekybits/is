@@ -226,6 +226,44 @@ func TestIs(t *testing.T) {
 					map[string]interface{}{"package": "is"},
 				)
 			},
+		},
+
+		// is.NotEqual
+		{
+			N: "NotEqual(1,2)",
+			F: func(is I) {
+				is.NotEqual(1, 2)
+			},
+		}, {
+			N: "NotEqual(1,1)",
+			F: func(is I) {
+				is.NotEqual(1, 1)
+			},
+			Fails: []string{"1 == 1"},
+		}, {
+			N: "NotEqual(1,nil)",
+			F: func(is I) {
+				is.NotEqual(1, nil)
+			},
+		}, {
+			N: "NotEqual(nil,1)",
+			F: func(is I) {
+				is.NotEqual(nil, 1)
+			},
+		}, {
+			N: "NotEqual(false,false)",
+			F: func(is I) {
+				is.NotEqual(false, false)
+			},
+			Fails: []string{"false == false"},
+		}, {
+			N: "NotEqual(map1,map2)",
+			F: func(is I) {
+				is.NotEqual(
+					map[string]interface{}{"package": "is"},
+					map[string]interface{}{"package": "isn't"},
+				)
+			},
 		}} {
 
 		tt := new(mockT)
