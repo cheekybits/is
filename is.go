@@ -250,6 +250,10 @@ func areEqual(a, b interface{}) bool {
 	if bValue.Type().ConvertibleTo(aValue.Type()) && aValue == bValue.Convert(aValue.Type()) {
 		return true
 	}
+	// Last ditch effort
+	if fmt.Sprintf("%#v", a) == fmt.Sprintf("%#v", b) {
+		return true
+	}
 
 	return false
 }
