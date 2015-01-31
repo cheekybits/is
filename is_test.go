@@ -228,6 +228,33 @@ func TestIs(t *testing.T) {
 			},
 		},
 
+		// is.True
+		{
+			N: "True(true,true)",
+			F: func(is I) {
+				is.True(true, true)
+			},
+		}, {
+			N: "True(false,false)",
+			F: func(is I) {
+				is.True(false, false)
+			},
+			Fails: []string{"true!=false"},
+		},
+		// is.False
+		{
+			N: "False(false,false)",
+			F: func(is I) {
+				is.False(false, false)
+			},
+		}, {
+			N: "False(true,true)",
+			F: func(is I) {
+				is.False(true, true)
+			},
+			Fails: []string{"false!=true"},
+		},
+
 		// is.NotEqual
 		{
 			N: "NotEqual(1,2)",

@@ -22,6 +22,12 @@ type I interface {
 	// Nil asserts that the specified objects are
 	// all nil.
 	Nil(obj ...interface{})
+	// True asserts that the specified objects are
+	// all true
+	True(obj ...interface{})
+	// False asserts that the specified objects are
+	// all true
+	False(obj ...interface{})
 	// Panic asserts that the specified function
 	// panics.
 	Panic(fn func())
@@ -138,6 +144,32 @@ func (i *i) Nil(o ...interface{}) {
 	for n, obj := range o {
 		if !isNil(obj) {
 			p := "expected nil"
+			if len(o) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			p += ": " + fmt.Sprintf("%#v", obj)
+			i.Logf(p)
+		}
+	}
+}
+
+func (i *i) True(o ...interface{}) {
+	for n, obj := range o {
+		if b, ok := obj.(bool); !ok || b != true {
+			p := "expected true"
+			if len(o) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			p += ": " + fmt.Sprintf("%#v", obj)
+			i.Logf(p)
+		}
+	}
+}
+
+func (i *i) False(o ...interface{}) {
+	for n, obj := range o {
+		if b, ok := obj.(bool); !ok || b != false {
+			p := "expected false"
 			if len(o) > 1 {
 				p += fmt.Sprintf(" (%d)", n)
 			}
