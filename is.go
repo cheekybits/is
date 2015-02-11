@@ -278,9 +278,10 @@ func areEqual(a, b interface{}) bool {
 	if aValue == bValue {
 		return true
 	}
+
 	// Attempt comparison after type conversion
-	if bValue.Type().ConvertibleTo(aValue.Type()) && aValue == bValue.Convert(aValue.Type()) {
-		return true
+	if bValue.Type().ConvertibleTo(aValue.Type()) {
+		return reflect.DeepEqual(a, bValue.Convert(aValue.Type()).Interface())
 	}
 	// Last ditch effort
 	if fmt.Sprintf("%#v", a) == fmt.Sprintf("%#v", b) {

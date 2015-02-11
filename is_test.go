@@ -213,7 +213,14 @@ func TestIs(t *testing.T) {
 				is.Equal(nil, 1)
 			},
 			Fails: []string{"<nil> != 1"},
-		}, {
+		},
+		{
+			N: "Equal(uint64(1),int64(1))",
+			F: func(is I) {
+				is.Equal(uint64(1), int64(1))
+			},
+		},
+		{
 			N: "Equal(false,false)",
 			F: func(is I) {
 				is.Equal(false, false)
