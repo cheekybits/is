@@ -42,6 +42,19 @@ type I interface {
 	Failf(format string, args ...interface{})
 }
 
+// New creates a new I capable of making
+// assertions.
+func New(t T) I {
+	return &i{t: t}
+}
+
+// Relaxed creates a new I capable of making
+// assertions, but will not fail immediately
+// allowing all assertions to run.
+func Relaxed(t T) I {
+	return &i{t: t, relaxed: true}
+}
+
 // T represents the an interface for reporting
 // failures.
 // testing.T satisfied this interface.
@@ -231,19 +244,6 @@ func (i *i) PanicWith(m string, fn func()) {
 	if r != m {
 		i.Logf("expected panic: \"%s\"", m)
 	}
-}
-
-// New creates a new I capable of making
-// assertions.
-func New(t T) I {
-	return &i{t: t}
-}
-
-// Relaxed creates a new I capable of making
-// assertions, but will not fail immediately
-// allowing all assertions to run.
-func Relaxed(t T) I {
-	return &i{t: t, relaxed: true}
 }
 
 // isNil gets whether the object is nil or not.
