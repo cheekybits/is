@@ -27,7 +27,7 @@ func TestSomething(t *testing.T) {
 
   // ensure no error
   obj, err := SomeFunc()
-  is.OK(err)
+  is.NoErr(err)
 
   // ensure not false
   b := SomeBool()
