@@ -19,9 +19,14 @@ type I interface {
 	// NoErr asserts that the value is not an
 	// error.
 	NoErr(err ...error)
+	// Err asserts that the value is an error.
+	Err(err ...error)
 	// Nil asserts that the specified objects are
 	// all nil.
 	Nil(obj ...interface{})
+	// NotNil asserts that the specified objects are
+	// all nil.
+	NotNil(obj ...interface{})
 	// True asserts that the specified objects are
 	// all true
 	True(obj ...interface{})
@@ -153,10 +158,35 @@ func (i *i) NoErr(errs ...error) {
 	}
 }
 
+func (i *i) Err(errs ...error) {
+	for n, err := range errs {
+		if isNil(err) {
+			p := "error expected"
+			if len(errs) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			i.Logf(p)
+		}
+	}
+}
+
 func (i *i) Nil(o ...interface{}) {
 	for n, obj := range o {
 		if !isNil(obj) {
 			p := "expected nil"
+			if len(o) > 1 {
+				p += fmt.Sprintf(" (%d)", n)
+			}
+			p += ": " + fmt.Sprintf("%#v", obj)
+			i.Logf(p)
+		}
+	}
+}
+
+func (i *i) NotNil(o ...interface{}) {
+	for n, obj := range o {
+		if isNil(obj) {
+			p := "unexpected nil"
 			if len(o) > 1 {
 				p += fmt.Sprintf(" (%d)", n)
 			}

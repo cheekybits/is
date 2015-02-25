@@ -58,6 +58,20 @@ func TestIs(t *testing.T) {
 			},
 			Fails: []string{"expected nil: \"nope\""},
 		},
+		// is.NotNil
+		{
+			N: "NotNil(\"nope\")",
+			F: func(is I) {
+				is.NotNil("nope")
+			},
+		},
+		{
+			N: "NotNil(nil)",
+			F: func(is I) {
+				is.NotNil(nil)
+			},
+			Fails: []string{"unexpected nil"},
+		},
 		// is.OK
 		{
 			N: "OK(false)",
@@ -134,6 +148,41 @@ func TestIs(t *testing.T) {
 				var err3 error
 				is.NoErr(err1, err2, err3)
 			},
+		},
+		// Err
+		{
+			N: "Err(errors.New(\"an error\"))",
+			F: func(is I) {
+				is.Err(errors.New("an error"))
+			},
+		}, {
+			N: "Err(&customErr{})",
+			F: func(is I) {
+				is.Err(&customErr{})
+			},
+		}, {
+			N: "Err(error(nil))",
+			F: func(is I) {
+				var err error
+				is.Err(err)
+			},
+			Fails: []string{"error expected"},
+		},
+		{
+			N: "Err(customErr1, customErr2, customErr3)",
+			F: func(is I) {
+				is.Err(&customErr{}, &customErr{}, &customErr{})
+			},
+		},
+		{
+			N: "Err(err1, err2, err3)",
+			F: func(is I) {
+				var err1 error
+				var err2 error
+				var err3 error
+				is.Err(err1, err2, err3)
+			},
+			Fails: []string{"error expected"},
 		},
 		// OK
 		{
@@ -310,11 +359,10 @@ func TestIs(t *testing.T) {
 
 		tt := new(mockT)
 		is := New(tt)
-		var rec interface{}
 
 		func() {
 			defer func() {
-				rec = recover()
+				recover()
 			}()
 			test.F(is)
 		}()
