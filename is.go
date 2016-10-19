@@ -3,6 +3,7 @@ package is
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -45,6 +46,9 @@ type I interface {
 	// Failf indicates that the test has failed with the
 	// formatted arguments.
 	Failf(format string, args ...interface{})
+	// Contains asserts that the container contains the
+	// containee
+	Contains(container, containee interface{})
 }
 
 // New creates a new I capable of making
@@ -67,6 +71,9 @@ type T interface {
 	FailNow()
 }
 
+// printer allows output to be supressed during testing
+var printer = (func(...interface{}) (int, error))(fmt.Print)
+
 // i represents an implementation of interface I.
 type i struct {
 	t       T
@@ -79,7 +86,7 @@ func (i *i) Log(args ...interface{}) {
 	i.l.Lock()
 	fail := fmt.Sprint(args...)
 	i.fails = append(i.fails, fail)
-	fmt.Print(decorate(fail))
+	printer(decorate(fail))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -89,7 +96,7 @@ func (i *i) Logf(format string, args ...interface{}) {
 	i.l.Lock()
 	fail := fmt.Sprintf(format, args...)
 	i.fails = append(i.fails, fail)
-	fmt.Print(decorate(fail))
+	printer(decorate(fail))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -319,4 +326,25 @@ func areEqual(a, b interface{}) bool {
 	}
 
 	return false
+}
+
+func (i *i) Contains(container, containee interface{}) {
+	switch cs := container.(type) {
+	case string:
+		i.containsString(cs, containee)
+	}
+}
+
+func (i *i) containsString(container string, containee interface{}) {
+	var cs string
+	if s, ok := containee.(string); ok {
+		cs = s
+	} else if s, ok := containee.(fmt.Stringer); ok {
+		cs = s.String()
+	} else {
+		i.Log("expected string or String")
+	}
+	if !strings.Contains(container, cs) {
+		i.Logf("expected: %s", cs)
+	}
 }

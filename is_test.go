@@ -23,7 +23,12 @@ func (m *mockT) Failed() bool {
 	return m.failed
 }
 
+func voidPrinter(...interface{}) (int, error) {
+	return 0, nil
+}
+
 func TestIs(t *testing.T) {
+	printer = voidPrinter
 
 	for _, test := range []struct {
 		N     string
