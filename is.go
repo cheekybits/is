@@ -72,21 +72,21 @@ type T interface {
 }
 
 // printer allows output to be supressed during testing
-var printer = (func(...interface{}) (int, error))(fmt.Print)
+var printer = (func(string))(
+	func(s string) {
+		fmt.Print(decorate(s))
+	})
 
 // i represents an implementation of interface I.
 type i struct {
 	t       T
-	fails   []string
 	l       sync.Mutex
 	relaxed bool
 }
 
 func (i *i) Log(args ...interface{}) {
 	i.l.Lock()
-	fail := fmt.Sprint(args...)
-	i.fails = append(i.fails, fail)
-	printer(decorate(fail))
+	printer(decorate(fmt.Sprint(args...)))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -94,9 +94,7 @@ func (i *i) Log(args ...interface{}) {
 }
 func (i *i) Logf(format string, args ...interface{}) {
 	i.l.Lock()
-	fail := fmt.Sprintf(format, args...)
-	i.fails = append(i.fails, fail)
-	printer(decorate(fail))
+	printer(decorate(fmt.Sprintf(format, args...)))
 	i.l.Unlock()
 	if !i.relaxed {
 		i.t.FailNow()
@@ -246,11 +244,12 @@ func (i *i) NotEqual(a, b interface{}) {
 }
 
 func (i *i) Fail(args ...interface{}) {
+	args = append([]interface{}{"failed: "}, args...)
 	i.Log(args...)
 }
 
 func (i *i) Failf(format string, args ...interface{}) {
-	i.Logf(format, args...)
+	i.Logf("failed: "+format, args...)
 }
 
 // Panic asserts that the specified function
