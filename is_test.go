@@ -23,6 +23,12 @@ func (m *mockT) Failed() bool {
 	return m.failed
 }
 
+type fooStringer struct{}
+
+func (fooStringer) String() string {
+	return "foo"
+}
+
 var printerOutput []string
 
 func voidPrinter(s string) {

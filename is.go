@@ -3,7 +3,6 @@ package is
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"sync"
 )
 
@@ -46,9 +45,6 @@ type I interface {
 	// Failf indicates that the test has failed with the
 	// formatted arguments.
 	Failf(format string, args ...interface{})
-	// Contains asserts that the container contains the
-	// containee
-	Contains(container, containee interface{})
 }
 
 // New creates a new I capable of making
@@ -325,25 +321,4 @@ func areEqual(a, b interface{}) bool {
 	}
 
 	return false
-}
-
-func (i *i) Contains(container, containee interface{}) {
-	switch cs := container.(type) {
-	case string:
-		i.containsString(cs, containee)
-	}
-}
-
-func (i *i) containsString(container string, containee interface{}) {
-	var cs string
-	if s, ok := containee.(string); ok {
-		cs = s
-	} else if s, ok := containee.(fmt.Stringer); ok {
-		cs = s.String()
-	} else {
-		i.Log("expected string or String")
-	}
-	if !strings.Contains(container, cs) {
-		i.Logf("expected: %s", cs)
-	}
 }
