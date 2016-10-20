@@ -23,7 +23,20 @@ func (m *mockT) Failed() bool {
 	return m.failed
 }
 
+type fooStringer struct{}
+
+func (fooStringer) String() string {
+	return "foo"
+}
+
+var printerOutput []string
+
+func voidPrinter(s string) {
+	printerOutput = append(printerOutput, strings.TrimSpace(s))
+}
+
 func TestIs(t *testing.T) {
+	printer = voidPrinter
 
 	for _, test := range []struct {
 		N     string
@@ -138,7 +151,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.NoErr(&customErr{}, &customErr{}, &customErr{})
 			},
-			Fails: []string{"unexpected error: Oops"},
+			Fails: []string{"unexpected error (0): Oops", "unexpected error (1): Oops", "unexpected error (2): Oops"},
 		},
 		{
 			N: "NoErr(err1, err2, err3)",
@@ -182,7 +195,7 @@ func TestIs(t *testing.T) {
 				var err3 error
 				is.Err(err1, err2, err3)
 			},
-			Fails: []string{"error expected"},
+			Fails: []string{"error expected (0)", "error expected (1)", "error expected (2)"},
 		},
 		// OK
 		{
@@ -303,7 +316,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.True(false, false)
 			},
-			Fails: []string{"true!=false"},
+			Fails: []string{"expected true (0): false", "expected true (1): false"},
 		},
 		// is.False
 		{
@@ -316,7 +329,7 @@ func TestIs(t *testing.T) {
 			F: func(is I) {
 				is.False(true, true)
 			},
-			Fails: []string{"false!=true"},
+			Fails: []string{"expected false (0): true", "expected false (1): true"},
 		},
 
 		// is.NotEqual
@@ -359,6 +372,7 @@ func TestIs(t *testing.T) {
 
 		tt := new(mockT)
 		is := New(tt)
+		printerOutput = make([]string, 0)
 
 		func() {
 			defer func() {
@@ -367,21 +381,18 @@ func TestIs(t *testing.T) {
 			test.F(is)
 		}()
 
-		if len(test.Fails) > 0 {
-			for n, fail := range test.Fails {
-				if !tt.Failed() {
-					t.Errorf("%s should fail", test.N)
-				}
-				if test.Fails[n] != fail {
-					t.Errorf("expected fail \"%s\" but was \"%s\".", test.Fails[n], fail)
-				}
-			}
-		} else {
-			if tt.Failed() {
-				t.Errorf("%s shouldn't fail but: %s", test.N, strings.Join(test.Fails, ", "))
+		for n, fail := range test.Fails {
+			if n >= len(printerOutput) {
+				t.Errorf("(%d) expected fail \"%s\"", n, fail)
+			} else if !strings.Contains(printerOutput[n], fail) {
+				t.Errorf("(%d) expected fail \"%s\" but was \"%s\"", n, fail, printerOutput[n])
 			}
 		}
-
+		if n, l := len(test.Fails), len(printerOutput); n < l {
+			for ; n < l; n++ {
+				t.Errorf("(%d) unexpected fail \"%s\"", n, printerOutput[n])
+			}
+		}
 	}
 
 }
